@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { parsePhoneNumber } from 'libphonenumber-js';
+import {getIsoCountryCode} from "../../utils/getIsoCountryCode.js";
 
 const UserSchema = new Schema(
     {
@@ -16,6 +17,11 @@ const UserSchema = new Schema(
             type: String,
             required: false,
         },
+        role: {
+            type: String,
+            enum: ['user', 'admin'],
+            default: 'user',
+        },
     },
     { timestamps: true, versionKey: false }
 );
@@ -23,8 +29,9 @@ const UserSchema = new Schema(
 UserSchema.pre('save', function (next) {
     if (this.isModified('phone')) {
         const phoneNumber = parsePhoneNumber(this.phone);
-        if (phoneNumber && phoneNumber.countryCallingCode) {
-            this.countryCode = phoneNumber.countryCallingCode;
+        if (phoneNumber) {
+            const countryCodeWithPlus = `+${phoneNumber.countryCallingCode}`;
+            this.countryCode = getIsoCountryCode(countryCodeWithPlus);
         }
     }
     next();
