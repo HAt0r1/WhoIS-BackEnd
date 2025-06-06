@@ -6,16 +6,8 @@ const sessionSchema = new Schema({
         ref: 'User',
         required: true
     },
-    accessToken: {
-        type: String,
-        required: true
-    },
     refreshToken: {
         type: String,
-        required: true
-    },
-    accessTokenExpires: {
-        type: Date,
         required: true
     },
     refreshTokenExpires: {
