@@ -1,4 +1,4 @@
-import whoiser from 'whoiser';
+import * as whoiser from 'whoiser';
 import jwt from 'jsonwebtoken';
 
 
@@ -18,7 +18,7 @@ export const searchDomain = async (req, res) => {
     if (!domainCC) return res.status(404).json({ message: 'Domain country code not found' });
 
     if (role !== 'admin' && domainCC !== userCC) {
-        return res.status(403).json({ message: 'Дані цього домену не доступні для вашого регіону' });
+        return res.status(403).json({ message: 'This domain is not available for your region.' });
     }
 
     res.json({ domain, whois: whoisData });
