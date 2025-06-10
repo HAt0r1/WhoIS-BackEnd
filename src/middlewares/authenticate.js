@@ -1,16 +1,16 @@
 import jwt from 'jsonwebtoken';
+import { env } from '../utils/env.js';
 
-import {env} from "../utils/env.js";
-
-const authenticate = async(req, res, next) => {
+const authenticate = (req, res, next) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) throw new Error('No token');
+        const authHeader = req.headers.authorization;
+        if (!authHeader) return res.status(401).json({ message: 'Not authorized' });
+        const token = authHeader.split(' ')[1];
         req.user = jwt.verify(token, env('JWT_SECRET'));;
         next();
-    } catch {
-        res.status(401).json({ message: 'Not authorized' });
+    } catch (err) {
+        res.status(401).json({ message: 'Invalid or expired token' });
     }
-}
+};
 
 export default authenticate;
