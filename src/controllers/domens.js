@@ -16,7 +16,12 @@ export const searchDomain = async (req, res) => {
         const apiUrl = `https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${apiKey}&domainName=${domain}&outputFormat=JSON`;
 
         const response = await axios.get(apiUrl);
-        const whoisData = response.data.WhoisRecord;
+        const whoisData = response.data?.WhoisRecord;
+
+        if (!whoisData) {
+            console.error("WHOIS response:", response.data);
+            return res.status(404).json({ message: "No WhoisRecord found for domain" });
+        }
 
         const domainCC = whoisData?.registrant?.countryCode;
 
