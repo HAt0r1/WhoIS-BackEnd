@@ -29,7 +29,10 @@ export const searchDomain = async (req, res) => {
             return res.status(404).json({ message: "Domain country code not found" });
         }
 
-        if (role !== "admin" && domainCC.toUpperCase() !== userCC.toUpperCase()) {
+        if (role !== "admin" &&
+            domainCC &&
+            userCC &&
+            domainCC.toUpperCase() !== userCC.toUpperCase()) {
             return res.status(403).json({ message: "This domain is not available for your region." });
         }
 
