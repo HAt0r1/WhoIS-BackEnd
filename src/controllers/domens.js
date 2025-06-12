@@ -3,8 +3,10 @@ import jwt from 'jsonwebtoken';
 import { env } from '../utils/env.js';
 
 export const searchDomain = async (req, res) => {
-    try {
-        const { role, countryCode: userCC } = req.user;
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) return res.status(401).json({ message: "No token" });
+
+        const { role, countryCode: userCC } = jwt.verify(token, env("JWT_SECRET"));
 
         const { domain } = req.body;
         if (!domain) return res.status(400).json({ message: "Domain required" });
@@ -14,15 +16,14 @@ export const searchDomain = async (req, res) => {
 
         const response = await axios.get(apiUrl);
         const whoisData = response.data?.WhoisRecord;
-        console.log(response)
-        console.log(whoisData);
 
         if (!whoisData) {
-            console.error("WHOIS response missing WhoisRecord:", response.data);
+            console.error("WHOIS response:", response.data);
             return res.status(404).json({ message: "No WhoisRecord found for domain" });
         }
 
         const domainCC = whoisData?.registrant?.countryCode;
+
         if (!domainCC) {
             return res.status(404).json({ message: "Domain country code not found" });
         }
@@ -32,8 +33,4 @@ export const searchDomain = async (req, res) => {
         }
 
         res.json({ domain, whois: whoisData });
-    } catch (err) {
-        console.error("searchDomain error:", err);
-        res.status(500).json({ message: "Something went wrong", data: err.message });
-    }
 };
