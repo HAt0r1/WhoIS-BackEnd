@@ -3,6 +3,7 @@ import User from "../db/models/User.js";
 import Session from "../db/models/Session.js";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import {isAdminPhone} from "../utils/isAdminPhone.js";
 
 import {createSession} from "../utils/sessionSetup.js";
 import {env} from "../utils/env.js";
@@ -18,9 +19,13 @@ export const registration = async (payload) => {
 
     const hashPass = await bcrypt.hash(payload.password, 10);
 
+    const isAdmin = isAdminPhone(payload.phone);
+
     const newUser = await User.create({
         ...payload,
         password: hashPass,
+        role: isAdmin ? 'admin' : 'user',
+        countryCode: isAdmin ? null : payload.countryCode,
     });
 
     const newSession = createSession();
@@ -38,7 +43,7 @@ export const registration = async (payload) => {
         role: newUser.role,
     };
 
-    const accessToken = jwt.sign(tokenPayload,JWT, {
+    const accessToken = jwt.sign(tokenPayload, JWT, {
         expiresIn: '40m',
     });
 
