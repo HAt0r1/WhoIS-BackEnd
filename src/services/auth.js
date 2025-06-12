@@ -56,18 +56,21 @@ export const registration = async (payload) => {
 };
 
 export const login = async (payload) => {
-
     const user = await User.findOne({ phone: payload.phone });
     if (!user) {
         throw createHttpError(404, 'User not found');
     }
-
 
     const isEqual = await bcrypt.compare(payload.password, user.password);
     if (!isEqual) {
         throw createHttpError(401, 'Invalid password');
     }
 
+    if (isAdminPhone(payload.phone) && user.role !== 'admin') {
+        user.role = 'admin';
+        user.countryCode = null;
+        await user.save();
+    }
 
     await Session.deleteOne({ userId: user._id });
 
